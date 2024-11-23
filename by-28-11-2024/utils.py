@@ -1,12 +1,15 @@
 from datetime import datetime
 import re
+import os
+import json
 
 def get_user_name() -> str:
+    """Эта функиция нужна, чтобы удостовериться, что имя, введённое пользователем, может быть использовано как название файла."""
     name = input('Введите своё имя: ')
-    if re.match(r'^[\w -_]$', name):
+    if re.match(r'^[\w -_]{1,64}$', name):
         return name
     else:
-        print('В имени можно использовать только буквы, цифры, пробелы, дефисы и знаки нижнего подчёркивания.')
+        print('В имени можно использовать только буквы, цифры, пробелы, дефисы и знаки нижнего подчёркивания.\nИмя не может быть длиннее 64 символов.')
         return get_user_name()
 
 
@@ -29,7 +32,7 @@ def choose_dictionary(dict_of_dicts : dict, lvl : str) -> dict:
 
 def test_words(key : str, value : str) -> bool:
 
-    user_input = input(f'Слово :{key}, {len(value)} букв, первая буква: {value[0]}... Ваш ответ: ').lower().strip()
+    user_input = input(f'Слово: {key}, {len(value)} букв, первая буква: {value[0]}... Ваш ответ: ').lower().strip()
 
     if user_input == value:
         print(f'Верно: {key} - это {value}.\n')
@@ -84,6 +87,9 @@ def result(answers : dict, user_name : str, difficulty : str) -> dict:
         'difficulty' : difficulty
     }
 
+def ask_for_results() -> bool:
+    user_input = input('').strip().lower()
+
 def display_results(results : dict) -> None:
     print(f'''
 Пользователь: {results['user_name']}
@@ -94,3 +100,12 @@ def display_results(results : dict) -> None:
 Уровень: {results['level']}
 Уровень сложности: {results['difficulty']}
 ''')
+
+def see_results(local_folder : str, results_folder : str) -> None:
+    user_input = input('\nХотите уивдеть другие результаты? Введите "да", если да, любое другое сообщение, если нет: ').strip().lower()
+    if user_input == 'да':
+        stats_files = os.listdir(os.path.join(local_folder, results_folder))
+        for file_name in stats_files:
+            with open(os.path.join(local_folder, results_folder, file_name), 'rt', encoding='utf-8') as file:
+                stats = json.loads(file.read())
+                display_results(stats)
