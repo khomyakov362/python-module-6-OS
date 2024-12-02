@@ -31,7 +31,7 @@ def choose_dictionary(dictionary_path : str, lvl : str) -> dict:
     except KeyError:
         print('Ключ не был найден в словаре, удостоверьтесь, что вы используете .json файл нужного формата.')
     except FileNotFoundError:
-        print('Файл не найден. Удостовертесь, что путь к файлу указан верно.')
+        print('Файл не найден. Удостоверьтесь, что путь к файлу указан верно.')
 
 
 def test_words(key : str, value : str) -> bool:
@@ -56,7 +56,8 @@ def test_answers(dictionary : dict) -> dict:
 def write_results(results_folder : str, results_dict : dict) -> None:
     user_name = results_dict['user_name'] 
     with open(os.path.join(results_folder ,f'{user_name}.json'), 'wt', encoding='utf-8') as file:
-        file.write(json.dumps(results_dict, ensure_ascii=False))
+        json_str = json.dumps(results_dict, ensure_ascii=False, indent=2) + '\n'
+        file.write(json_str)
 
 def result(answers : dict, user_name : str, difficulty : str, levels_path : str) -> dict:
     
@@ -95,7 +96,7 @@ def display_results(results : dict) -> None:
 Пользователь: {results['user_name']}
 Дата: {results['date']}
 Правильные ответы: {', '.join(results['correct_answers'])}
-Неправиьные ответы: {', '.join(results['incorrect_answers'])}
+Неправильные ответы: {', '.join(results['incorrect_answers'])}
 Счёт: {results['score']}
 Уровень: {results['level']}
 Уровень сложности: {results['difficulty']}
