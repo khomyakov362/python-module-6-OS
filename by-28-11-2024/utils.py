@@ -22,12 +22,16 @@ def user_lvl() -> str:
         print('Некорректный ввод!') 
         return user_lvl()
 
-def choose_dictionary(dict_of_dicts : dict, lvl : str) -> dict:
+def choose_dictionary(dictionary_path : str, lvl : str) -> dict:
     
     try:
+        with open(dictionary_path, 'rt', encoding='utf-8') as file:
+            dict_of_dicts = json.loads(file.read())
         return dict_of_dicts[lvl]
     except KeyError:
         print('Ключ не был найден в словаре, удостоверьтесь, что вы используете .json файл нужного формата.')
+    except FileNotFoundError:
+        print('Файл не найден. Удостовертесь, что путь к файлу указан верно.')
 
 
 def test_words(key : str, value : str) -> bool:
@@ -49,16 +53,15 @@ def test_answers(dictionary : dict) -> dict:
     
     return answers
 
-def result(answers : dict, user_name : str, difficulty : str) -> dict:
+def write_results(results_folder : str, results_dict : dict) -> None:
+    user_name = results_dict['user_name'] 
+    with open(os.path.join(results_folder ,f'{user_name}.json'), 'wt', encoding='utf-8') as file:
+        file.write(json.dumps(results_dict, ensure_ascii=False))
+
+def result(answers : dict, user_name : str, difficulty : str, levels_path : str) -> dict:
     
-    levels = {
-    0: "Нулевой",
-    1: "Так себе",
-    2: "Можно лучше",
-    3: "Норм",
-    4: "Хорошо",
-    5: "Отлично"
-    }
+    with open(levels_path, 'rt', encoding='utf-8') as file:
+        levels = json.loads(file.read())
 
     correct = [key for key in answers if answers[key]]
     incorrect = [key for key in answers if not answers[key]]
@@ -74,7 +77,7 @@ def result(answers : dict, user_name : str, difficulty : str) -> dict:
             print(answer)
         print()
     
-    level = levels[len(correct)]
+    level = levels[str(len(correct))]
     print(f'Ваш уровень:\n{level}')
 
     return {
@@ -87,9 +90,6 @@ def result(answers : dict, user_name : str, difficulty : str) -> dict:
         'difficulty' : difficulty
     }
 
-def ask_for_results() -> bool:
-    user_input = input('').strip().lower()
-
 def display_results(results : dict) -> None:
     print(f'''
 Пользователь: {results['user_name']}
@@ -101,11 +101,11 @@ def display_results(results : dict) -> None:
 Уровень сложности: {results['difficulty']}
 ''')
 
-def see_results(local_folder : str, results_folder : str) -> None:
+def see_results(results_folder) -> None:
     user_input = input('\nХотите уивдеть другие результаты? Введите "да", если да, любое другое сообщение, если нет: ').strip().lower()
     if user_input == 'да':
-        stats_files = os.listdir(os.path.join(local_folder, results_folder))
+        stats_files = os.listdir(os.path.join(results_folder))
         for file_name in stats_files:
-            with open(os.path.join(local_folder, results_folder, file_name), 'rt', encoding='utf-8') as file:
+            with open(os.path.join(results_folder, file_name), 'rt', encoding='utf-8') as file:
                 stats = json.loads(file.read())
                 display_results(stats)
